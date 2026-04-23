@@ -1,0 +1,40 @@
+services:
+  api:
+    container_name: insurance-admin-api
+    build:
+      context: .
+      target: development
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+    networks:
+      - insurance-network
+
+  postgres:
+    container_name: insurance-admin-postgres
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-insurance_admin}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - insurance-network
+
+volumes:
+  postgres_data:
+
+networks:
+  insurance-network:
+    driver: bridge
